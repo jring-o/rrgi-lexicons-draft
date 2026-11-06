@@ -1,0 +1,62 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.issue",
+  "description": "An issue: a proposed future experiment, measurement, or investigation that addresses a gap in evidence for a claim — the graph's todo object, and the middle of the canonical loop: a claim derived from prior claims (tech.scios.rrgi.derivedFrom) is born visibly untested; an open issue requests the test; the evidence produced by running it then supports or opposes the claim. DECISION 2026-07-18 (rebuild W1, user-confirmed): issue stays RRGI's own type, MAPPED TO — not replaced by — the MIRA community schema's Request (github.com/MIRA-science/schema, mira.yaml: Request carries request_for → Study and request_target → Claim). The mapping: MIRA's request_target corresponds to a motivatedBy entry pointing at a claim; request_for (a planned study) is deliberately not adopted yet — our issue points at the GAP, not at a planned study; and our lifecycle — the motivatedBy ARRAY, assignee, status, and the cross-author issueClaim volunteering flow — is RRGI extension with no MIRA counterpart, intended to be proposed upstream to MIRA. Historical lineage, kept as attribution: first ported (2026-05) from the DiscourseGraphs coalition's atproto lexicon (github.com/DiscourseGraphs/schemas, org.discoursegraphs.issue), fields verbatim EXCEPT motivatedBy — an ARRAY of at-uri where the coalition's is singular, so one issue can address several gaps at once. issue is a node; motivatedBy stays a bare at-uri (NOT dual-addressed), per RRGI's decision to dual-address only relation endpoints. Readers normalize string | string[] on read (a legacy single-target record stays valid in the index — the AppView never re-validates already-stored records — and still renders); new writes always emit an array.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Description of the proposed experiment, measurement, or investigation."
+          },
+          "motivatedBy": {
+            "type": "array",
+            "maxLength": 64,
+            "items": {
+              "type": "string",
+              "format": "at-uri"
+            },
+            "description": "AT-URIs of the claim(s) or evidence gap(s) that motivate this issue. An array — an issue may address several gaps at once. Bare at-uris (issue is a node, not a reified relation endpoint). Readers normalize a legacy single at-uri to a one-element list."
+          },
+          "assignee": {
+            "type": "string",
+            "format": "did",
+            "description": "DID of the person who has claimed this issue for investigation."
+          },
+          "status": {
+            "type": "string",
+            "knownValues": ["open", "claimed", "inProgress", "completed", "wontDo"],
+            "description": "Current status of this issue."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Detailed description of the proposed experiment, including anticipated methods, expected outcomes, or decision criteria."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

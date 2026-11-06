@@ -1,0 +1,71 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.source",
+  "description": "A research source that reports or generates evidence — e.g. an experiment, study, dataset, book, conference paper, or journal article. A source DESCRIBES the study it reports (tech.scios.rrgi.describes), and that study GROUNDS the evidence (tech.scios.rrgi.grounds) — the provenance spine source → describes → study → grounds → evidence; there is no single-hop source→evidence relation (MIRA's own direct link runs the other way, evidence → source document, and is accepted beside the spine since 2026-10-03 as tech.scios.rrgi.sourceDocument; extractors keep writing the spine). Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml, SourceDocument — is_a CreativeWork); first ported (2026-05) from the DiscourseGraphs coalition's OWL (github.com/DiscourseGraphs/schemas, dg:Source) — historical lineage, kept as attribution. Dual-addressing of every reference is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Human-readable title or citation for the source."
+          },
+          "sourceType": {
+            "type": "string",
+            "maxLength": 256,
+            "knownValues": [
+              "experiment",
+              "study",
+              "dataset",
+              "paper",
+              "preprint",
+              "book",
+              "website"
+            ],
+            "description": "The kind of source. Open to community-specific extension."
+          },
+          "doi": {
+            "type": "string",
+            "description": "Digital Object Identifier for the source, if any."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for the source, if any."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional additional context about the source (methods, edition, venue, etc.)."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Experiment', 'Study', 'Paper', 'Dataset')."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

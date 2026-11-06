@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.sourceDocument",
+  "description": "A reified 'sourceDocument' relation: an evidence node and the source document that described the activity behind its data (subject = evidence, object = source). Maps to the MIRA schema's sourceDocument slot (github.com/MIRA-science/schema, mira.yaml on main: slot_uri mira:sourceDocument, title 'Source document', 'A document that described the activity which led to the data on which the observation is based', domain Evidence, range SourceDocument). One of MIRA's four evidence links, added to RRGI on 2026-10-03. It is the direct counterpart of RRGI's provenance spine (source → describes → study → grounds → evidence), which extractors keep writing; this relation is accepted and shown whenever someone uses it (the older single-hop 'informs', source → evidence, stays deleted: this is MIRA's own link, in MIRA's direction). MIRA marks observationBase's range as provisional: mira.yaml's own comment on it reads \"That range is very, very provisional. could also involve schema:DigitalDocument , schema:Dataset\", so this shape may change when MIRA settles it. (The provisional note belongs to observationBase, the sibling evidence link; it is repeated on each of MIRA's four evidence links here so their provisional status is visible wherever one is used.) RRGI's intentional divergence (matching supports): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri, so the edge pins exact content versions and cannot rot. NOTE: no upstream atproto lexicon exists for this type yet; authored ahead of upstream from the MIRA schema, intended to be proposed back.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the evidence (the observation). RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the source document (the source node). See subject: RRGI divergence, CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration: where in the source document the activity is described."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

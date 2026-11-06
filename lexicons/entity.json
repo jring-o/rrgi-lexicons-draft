@@ -1,0 +1,161 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.entity",
+  "description": "A data record: the data an observation rests on — a figure panel, a table or a data file. Maps to the MIRA schema's Entity, the range of observationBase (github.com/MIRA-science/schema, mira.yaml on main: observationBase, 'The data on which the observation is based', range Entity — prov:Entity, which MIRA imports from PROV-O), added to RRGI on 2026-10-03 for the IOSP room. Evidence links to it with tech.scios.rrgi.observationBase; one data record can be the base of several evidence nodes, and credit for it is given once, on the data record (tech.scios.rrgi.attribution). It is a node in the graph: it may be a bundle member, and versionOf / equivalentTo pair it with another data record (same kind). A figure panel or table names its paper (`doi`, and optionally the paper's `source` node), the page, the figure and panel, the region on the page and the verbatim caption; a data file names its `url`. A panel drawn by hand in the paper view carries the paper's `doi`, which is how views show it with that paper. Since 2026-10-04 the extraction pipeline's figure step (pipeline-v5) also writes them, one per panel, figure or table it finds in the PDF, as members of the paper's bundle; provenance.wasGeneratedBy then names the step (figure-panels or pdf-figures), and `conflicts` notes a value read from the panel that disagrees with the text. MIRA marks observationBase's range as provisional: mira.yaml's own comment on it reads \"That range is very, very provisional. could also involve schema:DigitalDocument , schema:Dataset\", so this shape may change when MIRA settles it. Like every RRGI node it is independently authored, content-addressed and carries provenance; intended to be proposed back upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["kind", "text", "createdAt"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "knownValues": ["figurePanel", "table", "dataFile"],
+            "description": "What the data record is: a figure panel (one panel of a figure, or the whole of a single-panel figure), a table, or a data file. Open enum (knownValues)."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "The label shown for the data record, e.g. 'Figure 2, panel B' or the data file's name."
+          },
+          "doi": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "The DOI of the paper the panel or table belongs to (bare or as a doi.org URL; views normalise it as they do bundle `doi:` tags)."
+          },
+          "source": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Optional dual-addressed reference (URI + CID) to the paper's source node (tech.scios.rrgi.source), when one is in the graph. Advisory, like a bundle's members: a view that returns this data record does not promise to return that source too (the paper's version may be superseded or out of the view's layers), so a reader must not count on resolving it inside a view."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The page of the paper the panel or table is on, counting the PDF's first page as 1."
+          },
+          "figure": {
+            "type": "string",
+            "maxLength": 16,
+            "description": "The figure's number or label as the paper prints it, e.g. '2' or 'S3'."
+          },
+          "panel": {
+            "type": "string",
+            "maxLength": 8,
+            "description": "The panel's letter as the paper prints it, e.g. 'B'; absent for a single-panel figure, a whole figure, or a panel the paper prints no letter for."
+          },
+          "region": {
+            "type": "ref",
+            "ref": "#region",
+            "description": "Where the panel or table is on its page, in PDF points (1/72 inch), with the origin at the page's top-left corner and y counting downwards: x and y are the region's top-left corner, w and h its width and height. Whole numbers of at least 0 (ATProto has no floating-point numbers)."
+          },
+          "pageSize": {
+            "type": "ref",
+            "ref": "#pageSize",
+            "description": "The page's width and height in PDF points, so the region can be drawn at any scale. Whole numbers of at least 0."
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The verbatim caption, or for a panel the verbatim sub-caption, as the paper prints it."
+          },
+          "imageHash": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "The content hash of the rendered crop of the region, as 'sha256:<hex>', so a copy of the image can be checked against the record."
+          },
+          "conflicts": {
+            "type": "array",
+            "maxLength": 32,
+            "description": "Where a value read from this panel disagrees with the paper's text (added 2026-10-04 for the figure step of the extraction pipeline, pipeline-v5): each entry names the text's evidence node, the evidence node stating what the figure shows, and a note on the disagreement. Either node may be absent (the producer could not name it); the note is always there. Views show the disagreement beside the panel so the paper's authors can see it.",
+            "items": {
+              "type": "ref",
+              "ref": "#conflict"
+            }
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Where a data file can be fetched."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "description": "Where the panel or table is on its page, in PDF points (1/72 inch), with the origin at the page's top-left corner and y counting downwards: x and y are the region's top-left corner, w and h its width and height. Whole numbers of at least 0 (ATProto has no floating-point numbers).",
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "w": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "h": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pageSize": {
+      "type": "object",
+      "description": "The page's width and height in PDF points, so the region can be drawn at any scale. Whole numbers of at least 0.",
+      "required": ["w", "h"],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "h": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "required": ["note"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "The evidence node stating the value as the paper's text gives it."
+        },
+        "figure": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "The evidence node stating the value as it was read from the figure."
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "What disagrees, in plain words."
+        }
+      }
+    }
+  }
+}

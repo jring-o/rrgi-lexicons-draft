@@ -1,0 +1,83 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.claim",
+  "description": "A statement that an agent asserts or proposes within a discourse graph. Claims are the primary assertional unit: they can be supported or opposed by evidence, address questions, and be compiled into theories or models. A claim gains evidential weight ONLY from evidence (tech.scios.rrgi.supports/opposes are strictly evidence→claim); a claim built on prior claims records that descent with tech.scios.rrgi.derivedFrom, which carries no evidential weight — so a derived claim is structurally, visibly untested until evidence arrives; two claims that cannot both be true are linked with tech.scios.rrgi.contradicts. The epistemic status distinguishes between claims (believed with adequate evidence), hypotheses (posed for discussion without asserting belief), and community-defined variants. Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml, Claim class); first ported (2026-05) from the DiscourseGraphs coalition's org.discoursegraphs.claim (github.com/DiscourseGraphs/schemas) — historical lineage, kept as attribution. Dual-addressing of every reference is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The claim text. A declarative statement that can be supported or opposed by evidence."
+          },
+          "epistemicStatus": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#epistemicStatus",
+            "description": "The epistemic status of this statement. Defaults to unspecified (generic statement) per incremental formalization: authors can refine to 'claim', 'hypothesis', etc. as their thinking develops."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional elaboration, context, or reasoning behind this claim."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Conclusion', 'Finding', 'Design Principle')."
+          },
+          "contextEntities": {
+            "type": "array",
+            "description": "Aboutness: the concrete concepts and entities this claim is about (e.g. phenomena, materials, instruments, datasets, populations, tasks) — the same field evidence and questions carry. Records point at external subject authorities rather than minting an internal entity registry, following Wikidata P921 'main subject' ('primary topic of a work or act of communication') and schema.org 'about' ('The subject matter of an object'); each entry's optional uri resolves to the external authority. Stamped at authoring/decomposition time; enables shared-concept joins across literatures — two claims about one concept under different vocabularies become findable.",
+            "maxLength": 64,
+            "items": {
+              "type": "ref",
+              "ref": "#contextEntity"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "contextEntity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Name or identifier of the concept or entity. Prefer specific over generic — a rare, precise concept is worth more to discovery than a broad one."
+        },
+        "entityType": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The type of entity (e.g., 'phenomenon', 'material', 'instrument', 'dataset', 'population', 'method')."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URI identifying this entity in an external ontology or knowledge base (e.g. a Wikidata item) — the P921/about pattern: reference external authorities, never mint an internal registry."
+        }
+      }
+    }
+  }
+}

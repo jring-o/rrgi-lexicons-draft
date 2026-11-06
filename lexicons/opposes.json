@@ -1,0 +1,50 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.opposes",
+  "description": "A reified 'opposes' relation: evidential counter-weight against a claim — the mirror of tech.scios.rrgi.supports. The subject MUST be an evidence record (tech.scios.rrgi.evidence) and the object MUST be a claim (tech.scios.rrgi.claim). Claim-to-claim opposition is PROHIBITED: bare incompatibility between two claims is not an evidential act and is expressed with tech.scios.rrgi.contradicts (symmetric, no evidential weight) — only evidence can weaken a claim, exactly as only evidence can support one. Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml): MIRA's Argument mixin (range Claim) is assigned to no class — 'who may argue' is deliberately open upstream — and RRGI's answer is that in RRGI, Evidence is the only Argument, intended to be proposed upstream to MIRA. An AT Protocol lexicon cannot type strongRef endpoints, so this rule is normative prose here; enforcement lives in the AppView indexer and in every write path. Explicit divergence: the DiscourseGraphs coalition's OWL — the historical source these lexicons were first ported from (github.com/DiscourseGraphs/schemas, owl/dg_core.ttl, kept as attribution) — defines both dg:opposesCE [Evidence→Claim] and dg:opposesCC [Claim→Claim], unchanged as of April 2026; RRGI deliberately does not adopt dg:opposesCC (claim-versus-claim incompatibility is contradicts, not opposes). The coalition's atproto-lexicon layer has no opposes file at all, so this reified form is authored ahead of upstream there. Relations are separate assertions with their own metadata (author, provenance, strength) rather than attributes of nodes. Endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory) so the edge pins the exact content version and survives link rot — dual-addressing is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the opposing node. MUST be an evidence record (tech.scios.rrgi.evidence) — claim-to-claim opposition is prohibited; incompatible claims are linked with tech.scios.rrgi.contradicts. The lexicon cannot type a strongRef endpoint, so the indexer enforces this. CID mandatory so the edge survives link rot."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the opposed node. MUST be a claim (tech.scios.rrgi.claim) — the object side matches MIRA, whose Argument range is Claim. CID mandatory."
+          },
+          "strength": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#relationStrength",
+            "description": "Optional qualitative assessment of how strongly the subject opposes the object."
+          },
+          "warrant": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Optional argumentation warrant: the reasoning or methodological basis that justifies this opposition."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration on the nature of this opposition relationship."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.issueClaim",
+  "description": "A CROSS-AUTHOR expression of intent to take on an issue — 'I'll take this'. Authored in the CLAIMER's own repo, NOT the issue's: you cannot write another person's repo, so this is a separate record the AppView aggregates at read time, exactly the like/RSVP/Tangled-cross-author pattern. It NEVER mutates the target issue. The issue's AUTHOR stays authoritative for the issue's own `status`/`assignee` — those are the author's lifecycle, changed by `putRecord` on their own issue record (no backend change needed) — and the author CONFIRMS a claim by assigning it (setting the issue's `assignee` to the claimer's DID, `status` to 'claimed'). So an issueClaim is a signal, not a grant: it surfaces who is willing to run an issue; the author decides. The issue's author is identified by the DID in `subject.uri`; the claimer is this record's repo owner (its author DID). Mirrors RRGI's endorsement pattern of dual-addressing only what it points at: `subject` is a com.atproto.repo.strongRef (uri + cid), so a claim pins the exact version of the issue it is volunteering for and survives link rot. An RRGI extension: part of the issue lifecycle, which the MIRA community schema's Request (github.com/MIRA-science/schema) does not carry — no assignee, no status, no volunteering — intended to be proposed upstream to MIRA. Historical lineage, kept as attribution: authored (2026-05) alongside the port of the DiscourseGraphs coalition's issue lexicon (github.com/DiscourseGraphs/schemas), namespaced under tech.scios.rrgi.* like the rest.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the issue this record volunteers to take on. RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the claim pins the EXACT version of the issue it is volunteering for and survives link rot. The issue's author DID is read off this uri; the claimer is this record's own author."
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional note from the claimer about taking this on, e.g. 'I have a lab set up for this' or anticipated timeline. Context for the issue's author when deciding whether to assign."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

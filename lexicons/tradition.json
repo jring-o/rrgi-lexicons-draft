@@ -1,0 +1,60 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.tradition",
+  "description": "A tradition — a first-class domain node: an accumulated body of prior knowledge, methods, instruments, and assumptions (colloquially a domain, field, subfield, or research topic; the granularity lives in `level`). Traditions replace domain-as-metadata: as nodes they are participants, not labels — knowledge records hold typed relationships to them (see tech.scios.rrgi.stemsFrom), claims can be made ABOUT them, and lineage distance can be measured against them. Objects are never IN a tradition ('belongs to' is deliberately retired); they stem from traditions (origin, historical, plural) and may later speak to others (relevance — a future relation). The initial set is imported from the OpenAlex topic hierarchy (CC0; topics are citation-community clusters ≈ traditions; labels/descriptions at the topic level are LLM-generated — provenance names the generator, and the import is one institution's attributed lens, not ontological truth). The set is open: a future in-graph-minted tradition (condensed from cross-tradition activity) is this same record with no externalId and its own provenance. The hierarchy is carried by the `parent` field (node-held structural link, the issue.motivatedBy precedent) rather than reified edges: imported ontology structure is one artifact's internal shape, not an agent's contestable assertion about knowledge. RRGI-authored (no DiscourseGraphs coalition equivalent yet); intended to be proposed upstream. See DISCOVERY.md (concept) and notes/discovery-proposal-B-domain-layer.md (design).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "The tradition's display name (e.g. 'Caching and Content Delivery', 'Computer Science')."
+          },
+          "level": {
+            "type": "string",
+            "maxLength": 64,
+            "knownValues": ["domain", "field", "subfield", "topic"],
+            "description": "The hierarchy level. Open (not closed) so future born-in-graph traditions can carry community-defined levels (e.g. 'emergent')."
+          },
+          "externalId": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Scheme-prefixed identifier in the source ontology, e.g. 'openalex:T11986' or 'openalex:subfields/2202' (the canon_key convention applied to ontology ids). Absent on born-in-graph traditions."
+          },
+          "parent": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the parent tradition (topic→subfield→field→domain). Absent at the domain level. A structural node-held link, not a reified relation: the hierarchy is imported ontology structure, and the strongRef pins the exact parent version per RRGI's dual-addressing rule."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "What this tradition is. For OpenAlex-imported topics this is the source ontology's (LLM-generated) description — attributed via provenance, contestable like everything else."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "description": "Keywords (for OpenAlex topics, the source ontology's keyword list)."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

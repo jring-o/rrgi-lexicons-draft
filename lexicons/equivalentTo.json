@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.equivalentTo",
+  "description": "A reified, symmetric 'equivalentTo' relation: the subject and object records express the SAME proposition (co-reference). It is one agent's signed, contestable assertion — not a canonical merge: independent assertions of the same proposition are corroboration, so the granular records are never deleted or merged. The subject/object slots carry NO direction (A equivalentTo B == B equivalentTo A); the AppView treats the pair as unordered and computes the transitive closure (A==B, B==C => one cluster {A,B,C}). The cluster IS the shared concept, emergently; default read behavior is to EXPAND (show every attribution), with collapse offered as an optional lens — the opposite default from source canonicalization. Append-only: you do not retract an equivalence by deleting it; you contest it by publishing a negative endorsement (tech.scios.rrgi.endorsement: disbelieve or failedToVerify) against this record — supports/opposes are evidential relations (evidence→claim) and can never target an edge. This is the SUBJECTIVE dedup tool, for the semantic node types (claim, evidence) where sameness cannot be detected mechanically; SOURCES are deduped separately, by external identifier (DOI/PubMed/URL), at read time. The lexicon can only check that endpoints are strongRefs; the AppView convention is same-type endpoints (claim==claim, evidence==evidence) and it flags cross-type pairs (e.g. claim==evidence) as a suspicious modeling error. An RRGI extension — the MIRA community schema (github.com/MIRA-science/schema) has no equivalence concept — mirroring versionOf (lineage) but for co-reference; intended to be proposed upstream to MIRA. Like every RRGI relation, the subject/object endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid), so each equivalence pins exact content versions and cannot rot.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to one of the two equivalent records. The relation is symmetric, so subject/object are interchangeable. com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory and the link names the exact content version."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the other equivalent record. See subject: the relation is symmetric and the CID is mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional note on WHY the two records are equivalent (what proposition they share) or any caveat to the equivalence."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.grounds",
+  "description": "A reified 'grounds' relation: a study that produces or grounds a piece of evidence (subject = study, object = evidence) — the SECOND hop of the provenance spine source → describes → study → grounds → evidence. Maps to the MIRA schema's grounds slot (github.com/MIRA-science/schema, mira.yaml on main: domain Study, range Evidence, inverse is_grounded_in). Together with tech.scios.rrgi.describes it replaced the older single-hop 'informs' relation (source→evidence), which is DELETED — no informs lexicon exists, and the spine is the only source→evidence path extractors write (MIRA's own direct link, evidence → source document, is accepted beside it since 2026-10-03 as tech.scios.rrgi.sourceDocument, and MIRA's evidence → study link as tech.scios.rrgi.observationOriginActivity): MIRA inserts the study activity between the source document and the evidence it grounds. RRGI's intentional divergence (matching supports): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri, so the edge pins exact content versions and cannot rot. NOTE: no upstream atproto lexicon exists for this type yet; authored ahead of upstream from the MIRA schema, intended to be proposed back.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the grounding node (the study). RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the grounded node (the evidence). See subject: RRGI divergence, CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration: how the study produced or grounds this evidence."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

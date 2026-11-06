@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.addresses",
+  "description": "A reified 'addresses' relation: a claim that ANSWERS or speaks to a research question (subject = claim, object = question). Relations are separate assertions with their own metadata. Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml: slot addresses, domain Claim, range Question); first ported (2026-05) from the DiscourseGraphs coalition's OWL (github.com/DiscourseGraphs/schemas, dg:addresses) — historical lineage, kept as attribution. RRGI's intentional divergence (matching supports): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri — an extension intended to be proposed upstream to MIRA.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the addressing node (the claim). RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the addressed node (the question). See subject: RRGI divergence, CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration on how the claim addresses the question."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.observationStatement",
+  "description": "A reified 'observationStatement' relation: an evidence node and the claim that states what it observed (subject = evidence, object = claim). Maps to the MIRA schema's observationStatement slot (github.com/MIRA-science/schema, mira.yaml on main: slot_uri mira:observationStatement, title 'Observation statement', domain Evidence, range Claim, subproperty_of RelationDef), one of MIRA's four evidence links (with observationOriginActivity, observationBase and sourceDocument), added to RRGI on 2026-10-03 so a MIRA graph (a Nano Dash nanopub, say) arrives with every link it states. MIRA gives the slot only its domain and range. It is NOT an evidential relation: support and opposition stay tech.scios.rrgi.supports / opposes (evidence → claim, 'evidence is the only argument'), and a claim reached only through observationStatement is not thereby supported. MIRA marks observationBase's range as provisional: mira.yaml's own comment on it reads \"That range is very, very provisional. could also involve schema:DigitalDocument , schema:Dataset\", so this shape may change when MIRA settles it. (The provisional note belongs to observationBase, the sibling evidence link; it is repeated on each of MIRA's four evidence links here so their provisional status is visible wherever one is used.) RRGI's intentional divergence (matching supports): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri, so the edge pins exact content versions and cannot rot. NOTE: no upstream atproto lexicon exists for this type yet; authored ahead of upstream from the MIRA schema, intended to be proposed back.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the evidence (the observation). RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the claim that states the observation. See subject: RRGI divergence, CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration: how the claim states what the evidence observed."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

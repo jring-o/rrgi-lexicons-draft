@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.describes",
+  "description": "A reified 'describes' relation: a source document that describes the study it reports (subject = source, object = study) — the FIRST hop of the provenance spine source → describes → study → grounds → evidence. Maps to the MIRA schema's describesActivity slot (github.com/MIRA-science/schema, mira.yaml on main: slot_uri mira:describesActivity, domain CreativeWork, range Activity; MIRA's SourceDocument is_a CreativeWork and Study mixes in Activity, so source→study is the concrete instance). Together with tech.scios.rrgi.grounds it replaced the older single-hop 'informs' relation (source→evidence), which is DELETED — no informs lexicon exists, and the spine is the only source→evidence path extractors write (MIRA's own direct link, evidence → source document, is accepted beside it since 2026-10-03 as tech.scios.rrgi.sourceDocument): MIRA inserts the study activity between the source and the evidence it grounds. RRGI's intentional divergence (matching supports): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri, so the edge pins exact content versions and cannot rot. NOTE: no upstream atproto lexicon exists for this type yet; authored ahead of upstream from the MIRA schema, intended to be proposed back.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the describing node (the source document). RRGI divergence from upstream's bare at-uri: com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the described node (the study). See subject: RRGI divergence, CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration: how the source describes or reports this study."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

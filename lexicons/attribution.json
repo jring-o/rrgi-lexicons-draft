@@ -1,0 +1,76 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.attribution",
+  "description": "A signed, append-only statement of WHO DID THE RESEARCH behind a node or a data record: 'this work was made by <maker>' (subject = the node or data record, maker = a DID, an ORCID or a name, with an optional role). The person saying so is the account the record is saved in; the maker may be that person ('I made this') or someone else ('attribute to someone else'). Publishing a record is not attribution: the account a record lives in is its publisher, shown as 'published by'; attribution says who did the work. Maps to PROV-O's qualified attribution (prov:qualifiedAttribution → prov:Attribution with prov:agent and prov:hadRole), which the MIRA schema (github.com/MIRA-science/schema, mira.yaml imports prov) inherits; the roles follow CRediT (data = Investigation, analysis = Formal analysis, figure = Visualization, method = Methodology). Read-time, never stored: an attribution is SELF when its maker is the signer (by DID, or by the ORCID the signer linked with tech.scios.rrgi.orcidLink); it is CONFIRMED when it is self, when the maker has their own live self attribution on the same subject, or when it is carried from a nanopub (`carriedFrom`) that the maker signed themselves (`carriedSigner` is the maker's own ORCID); otherwise it shows as 'not yet confirmed'. A nanopub signed by someone else (an import bot, say) is not the maker's own statement, so its carried attribution waits for the maker's 'I made this' like any other credit. Per (signer, subject, maker) the latest non-revoked record is the live one. WITHDRAWAL is a record carrying `revokes` (a dual-addressed strongRef to the SPECIFIC earlier attribution), as with endorsements: it nullifies that record, it does not assert the opposite. Any account may write attributions; whose a view or an app trusts is its own choice, by who signed them (never by what a record says of itself). A carried nanopub attribution restates what the nanopub says, with who signed it. An ATTRIBUTION BOT's credit (2026-10-09, the IOSP credit bot) is an ordinary attribution signed by the bot, its maker an ORCID and/or a name (never a DID: the bot never guesses an account), with provenance saying how it was inferred (wasGeneratedBy inferredFromPaperMetadata, generatedFrom naming the paper's bundle, which RRGI's validator requires with that value; sourceUrl and basis). A reader counts a bot's credits as bot credits only when the bot is on the attributionBots account list the reader names in its own settings (tech.scios.rrgi.accountList; RRGI: RRGI_ATTRIBUTION_BOTS_LIST); the attributions of an account on its serviceAccounts list count for nothing. On a node, a person's credit replaces a trusted bot's by default: when a node has any person's credit (its own, carried from an earlier version, or a panel's), every bot credit on it is shown but not counted by the default 'made by' (a rule may still count both). A bot's credit is never self; it is confirmed when the named maker has their own live self attribution on the subject, like any credit given by someone else. EDITS (2026-10-09): an attribution on a node also applies to that node's newer versions, under its own signer: when a view hides X behind its newest visible, unrejected version X', every live attribution on X counts on X', keeping its state (self stays self; a credit to someone else is confirmed by their own 'I made this' on X'), and the view returns it with the versionOf records linking X' to X. Nothing is copied into the editor's account. An evidence node linked by tech.scios.rrgi.observationBase to an attributed data record counts, in views, as attributed by that record's makers (credit for a panel is given once, on the panel). Added 2026-10-03 for the IOSP room. Since 2026-10-05 (the IOSP assessment workshop) the subject may also be a group (tech.scios.rrgi.group): such an attribution is MEMBERSHIP of the group, its role always `method` (CRediT Methodology; RRGI's validator refuses any other role there). Joining is the starter's or joiner's own 'I made this' on the group; a member adding someone else is 'attribute to someone else', not yet confirmed until that person confirms; leaving is a withdrawal. A membership is never a credit for work on a paper: the views, the morning's assessment and a person's list of credits leave it out. An RRGI extension — MIRA has no attribution record of its own (a nanopub states prov:wasAttributedTo in its provenance graph) — intended to be proposed upstream to MIRA. Dual-addressed like every RRGI reference: `subject` and `revokes` are com.atproto.repo.strongRef (uri + cid).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "maker", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the node or data record whose work is attributed, or to a group (tech.scios.rrgi.group) the maker is a member of. On a withdrawal, the subject of the attribution being withdrawn."
+          },
+          "maker": {
+            "type": "ref",
+            "ref": "#maker",
+            "description": "Who did the work: a DID, an ORCID or a name (at least one; RRGI's validator requires it, which the lexicon cannot express; an empty member counts as absent). Give every identifier you have; a DID or an ORCID is what lets the maker confirm the credit with their own 'I made this'."
+          },
+          "role": {
+            "type": "string",
+            "knownValues": ["data", "analysis", "figure", "method"],
+            "description": "Optional: what the maker did, after CRediT. data: Investigation (collected the data). analysis: Formal analysis. figure: Visualization. method: Methodology. On a group (membership), always method. Open enum (knownValues)."
+          },
+          "carriedFrom": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional: the nanopub whose attribution this record carries across (its prov:wasAttributedTo), shown as 'from the nanopub'. It counts as confirmed only when `carriedSigner` is the maker's own ORCID."
+          },
+          "carriedSigner": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Optional, beside `carriedFrom`: who signed that nanopub — an ORCID URL (https://orcid.org/0000-0000-0000-000X) or another agent's IRI (added 2026-10-03). The carried attribution counts as confirmed only when this is the maker's own ORCID (bare or URL form); a nanopub signed by an import bot, for example, does not confirm it."
+          },
+          "revokes": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Present iff this record is a WITHDRAWAL. A dual-addressed strongRef (uri + cid) to the SPECIFIC earlier attribution being withdrawn (one of the signer's own) — it nullifies only that record and does not assert the opposite. Append-only: both records persist."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "maker": {
+      "type": "object",
+      "description": "Who did the work: a DID, an ORCID or a name (at least one; RRGI's validator requires it, which the lexicon cannot express; an empty member counts as absent). Give every identifier you have; a DID or an ORCID is what lets the maker confirm the credit with their own 'I made this'.",
+      "properties": {
+        "did": {
+          "type": "string",
+          "format": "did",
+          "description": "The maker's DID."
+        },
+        "orcid": {
+          "type": "string",
+          "maxLength": 19,
+          "description": "The maker's ORCID iD, bare: 0000-0000-0000-000X (RRGI's validator checks the form: four groups of four digits, the last character a digit or X; a lower-case x is accepted and read as X)."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "The maker's name as they are known in the field."
+        }
+      }
+    }
+  }
+}

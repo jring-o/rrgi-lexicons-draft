@@ -1,0 +1,78 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.protocol",
+  "description": "A protocol: a specified procedure or plan — the method a study follows to generate evidence. Methods live HERE, as first-class nodes on the provenance spine — claim ← supports ← evidence ← grounds ← study --follows--> protocol — never folded into claims, so 'which claims depend on this method' is a walk along the spine. (This supersedes the 2026-05-22 method fold, under which method-like content was folded into tagged claims; the fold is dead — see LEXICONS.md.) Adopted from the MIRA community schema (github.com/MIRA-science/schema, mira.yaml), where Protocol mixes in NodeSchema + Activity and a Study 'follows' a Protocol; RRGI reifies that link as tech.scios.rrgi.follows (study→protocol). In W3C PROV-O the same notion is a prov:Plan ('a set of actions or steps intended by one or more agents to achieve some goals') attached to an activity via prov:hadPlan on a qualified prov:Association — RRGI follows MIRA's node+edge modeling rather than PROV's qualified-association pattern. Scope is deliberately minimal (the study.json precedent): this node carries none of MIRA's other Protocol-adjacent slots yet. Like the other RRGI node types it is independently authored, content-addressed, and carries provenance.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The protocol statement: a concise, self-contained description of the procedure or plan — e.g. a measurement procedure, a survey instrument, an analysis plan, a simulation setup."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional additional context: steps, apparatus, parameters, assumptions, or limitations needed to interpret what this protocol specifies."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Method', 'Procedure', 'Analysis plan', 'Survey instrument')."
+          },
+          "contextEntities": {
+            "type": "array",
+            "description": "Aboutness: the concrete concepts and entities this protocol is about (e.g. phenomena, materials, instruments, datasets, populations, tasks) — the same field claims, evidence, and questions carry (extended to study/protocol 2026-07-25, DI-audit fix 2: without it the discovery scan's concept join cannot see methods). Records point at external subject authorities rather than minting an internal entity registry, following Wikidata P921 'main subject' and schema.org 'about'; each entry's optional uri resolves to the external authority. Stamped at authoring/decomposition time; enables shared-concept joins across literatures.",
+            "maxLength": 64,
+            "items": {
+              "type": "ref",
+              "ref": "#contextEntity"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "contextEntity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Name or identifier of the concept or entity. Prefer specific over generic — a rare, precise concept is worth more to discovery than a broad one."
+        },
+        "entityType": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The type of entity (e.g., 'phenomenon', 'material', 'instrument', 'dataset', 'population', 'method')."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URI identifying this entity in an external ontology or knowledge base (e.g. a Wikidata item) — the P921/about pattern: reference external authorities, never mint an internal registry."
+        }
+      }
+    }
+  }
+}

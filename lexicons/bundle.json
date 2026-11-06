@@ -1,0 +1,57 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.bundle",
+  "description": "A bundle: a reified super-node that names a SET of member records (\"these belong together\"). Unlike a relation it is NOT an n-ary predicate over its members — there is no subject/object and no claim about how the members relate; it is a flat, unordered membership set. Members may be ANY record with a CID — discourse nodes (question/claim/evidence/study/source/protocol), relations (e.g. supports, addresses, grounds, derivedFrom, versionOf), or OTHER bundles (recursive composition). A bundle is a SET, never an arguer: bundles are not legal endpoints of supports/opposes (those are strictly evidence→claim), so a 'paper A rebuts paper B' headline exists only as its granular edges — never as a bundle-level assertion. It reuses the same DNA as RRGI relations: it is independently authored, carries provenance, and each member is dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory) so the set pins exact content versions and cannot rot. A bundle is just the set; a narrative (tech.scios.rrgi.narrative) is a bundle WITH prose, and a paper is a narrative sitting over a bundle. Evolution is by versioning: edit a bundle by publishing a new bundle record + a tech.scios.rrgi.versionOf edge to the prior one (records are immutable, content-addressed by CID), so 'living' and 'frozen snapshot' are the same mechanism — every version is a citable CID. RRGI-authored (no coalition equivalent). Intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "members", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable label for the bundle (e.g. 'Core-Satellite Model — supporting graph')."
+          },
+          "members": {
+            "type": "array",
+            "minLength": 1,
+            "items": {
+              "type": "ref",
+              "ref": "com.atproto.repo.strongRef",
+              "description": "Dual-addressed reference (URI + CID) to one member record. com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory and the membership names the exact content version. A member may be any record: a discourse node, a relation, or another bundle (recursive)."
+            },
+            "description": "The set of member records that belong to this bundle. Flat and unordered (any reading order is carried by a narrative's prose, not the bundle). At least one member required."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional description of what this bundle IS — the rationale for grouping these members. This is metadata about the set, NOT the narrative prose (the written argument lives on a tech.scios.rrgi.narrative record)."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel"
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

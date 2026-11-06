@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.follows",
+  "description": "A reified 'follows' relation: a study that follows a protocol (subject = study, object = protocol) — the method hop of the provenance spine, claim ← supports ← evidence ← grounds ← study --follows--> protocol. The subject MUST be a study (tech.scios.rrgi.study) and the object MUST be a protocol (tech.scios.rrgi.protocol). Adopted from the MIRA community schema (github.com/MIRA-science/schema, mira.yaml: slot follows, domain Study, range Protocol). MIRA's slot is MULTIVALUED, so one edge record per study-protocol pair — a study following two protocols carries two follows edges. An AT Protocol lexicon cannot type strongRef endpoints, so this rule is normative prose here; enforcement lives in the AppView indexer and in every write path. RRGI's intentional divergence (matching every RRGI relation): subject/object are dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory) instead of a bare reference, so the edge pins exact content versions and cannot rot — an extension intended to be proposed upstream to MIRA. No upstream atproto lexicon exists for this relation; authored here from the MIRA schema.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the following node (the study). MUST be a study (tech.scios.rrgi.study); the lexicon cannot type a strongRef endpoint, so the indexer enforces this. CID mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the followed node (the protocol). MUST be a protocol (tech.scios.rrgi.protocol); one edge record per study-protocol pair (MIRA's follows is multivalued). CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration: how the study follows or adapts this protocol."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

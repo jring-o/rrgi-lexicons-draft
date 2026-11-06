@@ -1,0 +1,45 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.derivedFrom",
+  "description": "A reified 'derivedFrom' relation: intellectual descent between claims. The subject MUST be a claim (tech.scios.rrgi.claim) — the DERIVED claim — and the object MUST be a claim: ONE ancestor it was built from (one edge record per ancestor; a claim synthesized from three prior claims carries three derivedFrom edges). Direction is derived→ancestor, matching the versionOf precedent (subject = newer). Derivation is NOT support: this relation deliberately has NO strength field and confers NO evidential weight, because in this grammar only evidence supports or opposes a claim (tech.scios.rrgi.supports/opposes are evidence→claim only). A claim born by derivation therefore has zero supports edges and is structurally, visibly untested — that integrity property is the entire point: no chain of assertions can manufacture apparent empirical backing. The canonical loop: evidence supports the ancestor claims; a new claim is derived from them (this edge); an issue (tech.scios.rrgi.issue, status open) requests the test; evidence later supports — or opposes — the derived claim, and only then does it carry weight. Direction and meaning follow W3C PROV-O prov:wasDerivedFrom — 'the construction of a new entity based on a pre-existing entity' (domain and range both prov:Entity) — pointing from the newer derived claim to the prior claim it was built on. Distinct from the provenanceInfo.generatedFrom field (the mechanical record-production audit trail, stamped by the producer at creation, about the RECORD): this relation is about the IDEA's descent — assertable and contestable by third parties, warranted, and load-bearing graph structure. An AT Protocol lexicon cannot type strongRef endpoints, so these rules are normative prose here; enforcement lives in the AppView indexer and in every write path. An RRGI extension — the MIRA community schema (github.com/MIRA-science/schema) has no derivation concept — intended to be proposed upstream to MIRA. Like every RRGI relation, endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory), so the edge pins exact content versions and cannot rot.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the DERIVED claim — the newer one, built from the ancestor. MUST be a claim (tech.scios.rrgi.claim). The lexicon cannot type a strongRef endpoint, so the indexer enforces this. CID mandatory so the edge names the exact content version."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to ONE ancestor claim the subject was derived from. MUST be a claim (tech.scios.rrgi.claim); one edge record per ancestor. CID mandatory."
+          },
+          "warrant": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Optional argumentation warrant: the reasoning that licenses the derivation — how the ancestor leads to the derived claim. The warrant argues the inference; it never confers evidential weight (only a supports edge from evidence does that)."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration on the nature of this derivation."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

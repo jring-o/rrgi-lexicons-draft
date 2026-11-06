@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.stemsFrom",
+  "description": "A reified, directional 'stems from' relation: the subject knowledge record (claim, evidence, question, source, study, or protocol) has its ORIGIN in the object tradition (tech.scios.rrgi.tradition) — it grew out of that tradition's prior art, methods, and assumptions. Origin is historical, plural (a record may stem from several traditions), and fixed at birth; it deliberately replaces membership ('belongs to' does not exist — an object is never IN a domain). Typically machine-written by an attributed origin-assigner (e.g. derived from the paper a record was decomposed from, via its DOI's OpenAlex topic assignments — the derivation and classifier score are stated in `description`), with machine provenance, contestable after the fact like every record: you contest an origin by publishing a negative endorsement (tech.scios.rrgi.endorsement: disbelieve or failedToVerify) against this record, never by deleting — supports/opposes are evidential relations (evidence→claim) and can never target an edge. The AppView convention is subject = knowledge node, object = tradition node; the lexicon can only check that endpoints are strongRefs, and cross-kind pairs are flagged as a modeling error. Like every RRGI relation, endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid), so the edge pins exact content versions and cannot rot. An RRGI extension — the MIRA community schema (github.com/MIRA-science/schema) has no domain concept — intended to be proposed upstream to MIRA; its future companion 'speaksTo' (relevance — current, changing) is deliberately not yet defined. See DISCOVERY.md (concept) and notes/discovery-proposal-B-domain-layer.md (design).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the knowledge record that stems from the tradition (claim, evidence, question, source, study, or protocol). The CID is mandatory so the edge names the exact content version."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the tradition node (tech.scios.rrgi.tradition) the subject stems from. The CID is mandatory so the edge names the exact content version."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "How this origin was derived, human-readable and machine-parseable — e.g. 'via doi:10.1145/3544216.3544232 → openalex:W2044337305 · topic score 0.998 · assigned from the paper this record was decomposed from'. The rationale makes the machine judgment auditable in place."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

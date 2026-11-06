@@ -1,0 +1,50 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.supports",
+  "description": "A reified 'supports' relation: evidential backing for a claim. The subject MUST be an evidence record (tech.scios.rrgi.evidence) and the object MUST be a claim (tech.scios.rrgi.claim). Claim-to-claim support is PROHIBITED: in this grammar 'supported' always means 'has evidential backing', so a claim can never inherit apparent support from other claims — a claim built on prior claims is linked with tech.scios.rrgi.derivedFrom, which carries no evidential weight and leaves the derived claim structurally, visibly untested until evidence arrives. Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml): MIRA hangs supports/opposes on an Argument mixin whose range is Claim and deliberately assigns Argument to no class, leaving 'who may argue' open; RRGI's answer to that open question is that in RRGI, Evidence is the only Argument — intended to be proposed upstream to MIRA. An AT Protocol lexicon cannot type strongRef endpoints, so this rule is normative prose here; enforcement lives in the AppView indexer and in every write path. Explicit divergence, stated so it cannot be silent: the DiscourseGraphs coalition's artifacts — the historical source these lexicons were first ported from (github.com/DiscourseGraphs/schemas), kept as attribution — define claim-to-claim support in both the OWL (dg:supportsCC) and the live atproto lexicon (org.discoursegraphs.supports, which permits claim-to-claim support and carries a strength field; current as of April 2026); RRGI deliberately does not adopt claim-to-claim support. Relations are separate assertions with their own metadata (author, provenance, strength) rather than attributes of nodes; the support relation itself is a statement that can be endorsed or contested. Endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory) so the edge pins the exact content version and cannot silently re-point or rot — dual-addressing is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the supporting node. MUST be an evidence record (tech.scios.rrgi.evidence) — claim-to-claim support is prohibited; claim descent is tech.scios.rrgi.derivedFrom. The lexicon cannot type a strongRef endpoint, so the indexer enforces this. The CID is mandatory and the edge survives link rot — if the target moves or is edited, the CID still names the exact content (also fetchable from IPFS)."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the supported node. MUST be a claim (tech.scios.rrgi.claim) — the object side matches MIRA, whose Argument range is Claim. CID mandatory."
+          },
+          "strength": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#relationStrength",
+            "description": "Optional qualitative assessment of the strength of this support relation."
+          },
+          "warrant": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Optional argumentation warrant: the reasoning or methodological basis that justifies this support relationship. When communities disagree about what counts as evidence or valid inference, warrants make those disagreements explicit."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration on the nature of this support relationship."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

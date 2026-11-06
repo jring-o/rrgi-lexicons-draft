@@ -1,0 +1,78 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.question",
+  "description": "A research question: a scientific unknown that we want to make known, addressable by the systematic application of research methods. Questions organize inquiry; claims address them (see tech.scios.rrgi.addresses). Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml, Question class); first ported (2026-05) from the DiscourseGraphs coalition's OWL (github.com/DiscourseGraphs/schemas, dg:Question) — historical lineage, kept as attribution. Dual-addressing of every reference is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The research question: a scientific unknown posed for systematic investigation."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional elaboration: scope, motivation, or context for the question."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Research Question', 'Aim', 'Problem')."
+          },
+          "contextEntities": {
+            "type": "array",
+            "description": "Aboutness: the concrete concepts and entities this question is about (e.g. phenomena, materials, instruments, datasets, populations, tasks) — the same field claims and evidence carry. Records point at external subject authorities rather than minting an internal entity registry, following Wikidata P921 'main subject' ('primary topic of a work or act of communication') and schema.org 'about' ('The subject matter of an object'); each entry's optional uri resolves to the external authority. Stamped at authoring/decomposition time; enables shared-concept joins across literatures — an open question and a distant claim about one concept become findable together.",
+            "maxLength": 64,
+            "items": {
+              "type": "ref",
+              "ref": "#contextEntity"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "contextEntity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Name or identifier of the concept or entity. Prefer specific over generic — a rare, precise concept is worth more to discovery than a broad one."
+        },
+        "entityType": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The type of entity (e.g., 'phenomenon', 'material', 'instrument', 'dataset', 'population', 'method')."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URI identifying this entity in an external ontology or knowledge base (e.g. a Wikidata item) — the P921/about pattern: reference external authorities, never mint an internal registry."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.versionOf",
+  "description": "A reified 'versionOf' relation: the subject record is a newer version of the object record (subject = newer, object = prior). A neutral lineage link — the newer version may correct, refine, extend, or build on the prior one; it does NOT itself assert that the prior version is wrong or obsolete. Standing is computed from endorsements, not declared by this edge. Because records are immutable (content-addressed by CID), revising a node means publishing a NEW record and linking it back to its predecessor with this edge, rather than mutating the original in place — so every version keeps a distinct uri+cid and the full lineage is permanent and traversable. RRGI-authored (no coalition equivalent yet); aligned with the DataCite version-relation vocabulary (IsNewVersionOf / IsPreviousVersionOf), the metadata standard behind DOIs, so the graph maps cleanly onto existing scholarly infrastructure. Like every RRGI relation, the subject/object endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid) so the lineage pins exact content versions and cannot rot. Intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the NEWER version (this record supersedes the object in lineage). com.atproto.repo.strongRef requires both uri and cid, so the CID is mandatory and the link names the exact content version."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the PRIOR version this record is a new version of. See subject: CID mandatory."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional note on what changed in this version (what was corrected, refined, extended, or added) relative to the prior one."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

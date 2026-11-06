@@ -1,0 +1,56 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.endorsement",
+  "description": "A unary, signed, append-only PERSONAL STANCE on ANY record in the graph — a node OR an edge (relation record) — distinct from the evidence-backed BINARY relations supports/opposes (which require a backing node, and which are strictly evidential: evidence→claim only). Because supports/opposes can never target an edge, a negative endorsement (disbelieve / failedToVerify) on an edge record IS the contest mechanism for edges — including machine-written equivalentTo and stemsFrom edges and the derivedFrom/contradicts relations; this is what keeps every machine-written assertion contestable. Two ± axes plus a conditional: credence (believe / disbelieve = 'I find this credible / not credible'), verification (verified / failedToVerify = 'I checked or reproduced it; it holds / it does not'), and qualified (endorse with a stated caveat, carried in `qualification`). A separate REVIEW axis (added 2026-10-03 for the IOSP room): `reviewed` records a human review of a node (often an AI-made one) with an `outcome` — accepted (the node is right as written), edited (the reviewer published a corrected new version, named in `replacement` and linked to the old node by a tech.scios.rrgi.versionOf edge) or rejected (the node should not be in the graph; the optional reason rides `qualification`). Reviewed is a far lower bar than verified: it says 'this node is a faithful, well-formed statement', not 'I examined or reproduced it and it holds'. A rejection is never a deletion — it is a signed, withdrawable record, and views decide what to show. Per (reviewer, subject) the latest non-revoked `reviewed` record is the live review; the credibility standing ignores this axis. WITHDRAWAL is a separate operation, not a stance: a record carrying `revokes` (a dual-addressed strongRef to the SPECIFIC prior endorsement being withdrawn) means 'disregard that endorsement' → back to NEUTRAL, NOT 'assert the opposite'. This mirrors the atproto label `neg`, whose spec says a negation 'does not mean that the inverse ... is true, only that the previous label has been retracted'; asserting the opposite is a `disbelieve` stance or (against a claim) an evidence-backed `opposes` edge. An optional `reason` records why a withdrawal happened — SOFT (superseded / view-evolved) tells a curating AppView to keep the prior weight; HARD (subject-flawed / error) tells it to discount. Standing/weighting/contested are NOT in the record: they are the AppView's swappable read-time curation, consistent with 'permissionless write, reconciled read'. An RRGI extension — the MIRA community schema (github.com/MIRA-science/schema) has no endorsement concept — intended to be proposed upstream to MIRA. Historical lineage, kept as attribution: first ported (2026-05) from the DiscourseGraphs coalition's believe/validated/retract/qualified (github.com/DiscourseGraphs/schemas, org.discoursegraphs.endorsement, an open 'belief predicate' question), then deliberately reworked: we drop `retract` (scholarly retraction is node-level and emergent here — a counter-claim + withdrawn endorsements, never an endorsement type), rename validated→verified and add its negative twin failedToVerify, add the negative credence twin disbelieve, and add the `revokes` withdrawal. RRGI's dual-addressing divergence (matching supports): `subject` (and `revokes`) use com.atproto.repo.strongRef (uri + cid) instead of a bare at-uri, so an endorsement pins the exact content version it vouches for and a withdrawal pins the exact endorsement it revokes.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the record this stance concerns — ANY record: a node or an edge (relation record). On a stance, the record being endorsed; on a withdrawal, the record the revoked endorsement was about. A negative stance on an edge record is how an edge is contested. com.atproto.repo.strongRef requires both uri and cid, so the stance names the exact content version it vouches for and survives link rot."
+          },
+          "endorsementType": {
+            "type": "string",
+            "knownValues": ["believe", "disbelieve", "verified", "failedToVerify", "qualified", "reviewed", "adopted"],
+            "description": "The stance. CREDENCE axis: believe / disbelieve (a personal judgement, no backing node — distinct from the evidence-backed opposes edge, exactly as believe is distinct from supports). VERIFICATION axis: verified / failedToVerify (I examined or reproduced it; it holds / it does not — the high-trust signal). qualified: endorse with a caveat (see qualification). REVIEW axis: reviewed (a human review of the node, with an `outcome`; added 2026-10-03). adopted (added 2026-10-05 for the IOSP assessment workshop): 'we're starting from this one', said of a group's funding algorithm (tech.scios.rrgi.algorithm; RRGI's validator accepts it only there), with an optional note in `qualification` such as the room it was said in; every adoption is kept until withdrawn. Open enum (knownValues), so a curating AppView can recognize new stances without a breaking change. Omitted / present-but-ignored on a withdrawal (a record with `revokes` is a withdrawal, not a stance)."
+          },
+          "qualification": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "The caveat or condition on the stance (especially for `qualified`), e.g. 'valid under conditions X but not Y'. On a `reviewed` record, the reviewer's note — the reason for a rejection, or any remark; required (not blank) on a question or a comment about an algorithm. On an `adopted` record, an optional note."
+          },
+          "outcome": {
+            "type": "string",
+            "knownValues": ["accepted", "edited", "rejected", "questioned", "commented"],
+            "description": "The review's outcome, on a `reviewed` record (required there by RRGI's validator, which the lexicon cannot express; ignored on every other type). accepted: the node is right as written. edited: the reviewer published a corrected new version (see `replacement`), which supersedes this one in views. rejected: the node should not be in the graph (views hide it unless another reviewer accepts it; the reason rides `qualification`). Two more for a group's funding algorithm (tech.scios.rrgi.algorithm; added 2026-10-05 for the IOSP assessment workshop, and RRGI's validator accepts them only there): questioned (the reviewer has a question about it, which `qualification` must hold) and commented (a remark, which `qualification` must hold). Accepted and questioned are a reviewer's live review of an algorithm (per reviewer, the latest not withdrawn); a comment never replaces a review, and every comment is kept until withdrawn. Open enum (knownValues)."
+          },
+          "replacement": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "On a `reviewed` record whose outcome is `edited` (required there by RRGI's validator): a dual-addressed strongRef (uri + cid) to the reviewer's corrected new version of the subject — a new record in the same collection, linked to the subject by a tech.scios.rrgi.versionOf edge (subject = the new version, object = this endorsement's subject)."
+          },
+          "revokes": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Present iff this record is a WITHDRAWAL. A dual-addressed strongRef (uri + cid) to the SPECIFIC prior endorsement being withdrawn — withdrawal nullifies only that exact endorsement record (→ disregard it, back to neutral), it does not assert the opposite and does not touch the subject node. Append-only: the prior endorsement and this withdrawal both persist; an AppView reads the author's LATEST non-revoked stance as current."
+          },
+          "reason": {
+            "type": "string",
+            "knownValues": ["superseded", "view-evolved", "subject-flawed", "error"],
+            "description": "On a withdrawal, why. SOFT — superseded / view-evolved — signals 'keep my prior weight' (e.g. the node was superseded by a newer version; my endorsement of this version still stands). HARD — subject-flawed / error — signals 'discount it' (the node is flawed, or my endorsement was a mistake). The soft/hard split is honored at read time by the curating AppView, not enforced by the schema. Open enum (knownValues)."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

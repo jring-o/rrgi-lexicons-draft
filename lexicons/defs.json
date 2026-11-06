@@ -1,0 +1,182 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.defs",
+  "description": "Shared field-type definitions reused across the RRGI discourse graph records: epistemicStatus, relationStrength, localLabel, and provenanceInfo; and, for the account lists (tech.scios.rrgi.accountList, 2026-10-09), accountListPurpose with its tokens serviceAccounts and attributionBots, and accountListUse / accountListUseItem, the exact list members a reader used. (The node and relation record types themselves live in their own lexicon files, one per type, not here.) Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml) — the core RRGI implements; field shapes were first ported (2026-05) from the DiscourseGraphs coalition's artifacts (github.com/DiscourseGraphs/schemas, org.discoursegraphs.defs) — historical lineage, kept as attribution. Everything beyond MIRA is RRGI extension, intended to be proposed upstream to MIRA.",
+  "defs": {
+    "epistemicStatus": {
+      "type": "string",
+      "description": "The epistemic status of a statement. Open (not closed) to allow community-specific extensions.",
+      "knownValues": [
+        "claim",
+        "hypothesis",
+        "conjecture"
+      ]
+    },
+    "relationStrength": {
+      "type": "string",
+      "description": "Optional qualitative indicator of relation strength. Open to extension.",
+      "knownValues": [
+        "strong",
+        "moderate",
+        "weak",
+        "disputed"
+      ]
+    },
+    "localLabel": {
+      "type": "object",
+      "description": "A community-local label mapping for a node or relation type. Enables local variation in terminology (e.g., 'hypothesis' vs 'conjecture') while preserving interoperability through the base type reference.",
+      "required": ["label", "baseType"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "The local display label used by this community or tool."
+        },
+        "baseType": {
+          "type": "string",
+          "description": "The base schema type this local label maps to, as an NSID (e.g., 'tech.scios.rrgi.claim')."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Optional description of how this community uses this label."
+        }
+      }
+    },
+    "provenanceInfo": {
+      "type": "object",
+      "description": "Provenance metadata for a discourse graph record (nodes and relations alike), following PROV-O semantics. Tracks how the record was generated (manual authoring, AI-assisted extraction, etc.) and from what. Who published a record is not stated here: the publisher is the account the record lives in (the DID in its at-uri, which signs it), shown as 'published by'. Who did the research is a separate, signed tech.scios.rrgi.attribution record. The former `wasAttributedTo` (the publishing account's DID, repeated) was removed on 2026-10-03; records that still carry it stay valid, because a record's unknown fields are accepted.",
+      "properties": {
+        "wasGeneratedBy": {
+          "type": "string",
+          "description": "Description or identifier of the activity that produced this node. figure-panels and pdf-figures (2026-10-04) name the extraction pipeline step that found a data record (tech.scios.rrgi.entity) in the paper PDF: figure-panels a panel (a model reads the figure), pdf-figures a whole figure or a table (read from the PDF layout, no model). assessmentEngine (2026-10-05) marks a funding algorithm's result (tech.scios.rrgi.assessmentResult), computed by the Assessment App's scoring engine; aiSuggested marks an algorithm version kept exactly as the App's Helper suggested it. inferredFromPaperMetadata (2026-10-09, the IOSP credit bot) marks an attribution an attribution bot inferred from a paper's metadata (the publisher's author list in Crossref or DataCite, else the authors printed in the paper); such a record must name what it was inferred from in generatedFrom (the paper's bundle), which RRGI's validator checks. Like every value here it describes how the record was made and grants nothing: readers trust attributions by who signed them (the attributionBots account list a reader names), never by this field, which anyone can write.",
+          "knownValues": [
+            "manualAuthoring",
+            "aiAssistedExtraction",
+            "aiSuggested",
+            "importedFromSource",
+            "figure-panels",
+            "pdf-figures",
+            "assessmentEngine",
+            "inferredFromPaperMetadata"
+          ]
+        },
+        "validatedBy": {
+          "type": "array",
+          "description": "DIDs of agents who have validated this node after initial creation (e.g., after AI extraction).",
+          "items": {
+            "type": "string",
+            "format": "did"
+          }
+        },
+        "generatedFrom": {
+          "type": "array",
+          "description": "AT-URIs of the records this record was generated from — the mechanical record-production audit trail (pairs with wasGeneratedBy; PROV generation language: the activity that generated this record consumed those records). Stamped by the producer at creation, about the RECORD. Renamed from 'derivedFrom' (2026-07-18) to clear the collision with the tech.scios.rrgi.derivedFrom relation, which is a different fact: an assertable, contestable claim about an IDEA's descent from ancestor claims.",
+          "items": {
+            "type": "string",
+            "format": "at-uri"
+          }
+        },
+        "excerpt": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Verbatim passage of the source this record was extracted or derived from — the record's grounding in the source's own words. A short quotation, checkable against any copy of the source, forever — unlike an offset, which is only meaningful against one specific extraction. When the grounding passage is longer than the quotation, this holds its opening words and `passage` holds the whole. Stamped at creation like all provenance."
+        },
+        "passage": {
+          "type": "string",
+          "maxLength": 8000,
+          "maxGraphemes": 2000,
+          "description": "The whole verbatim grounding passage, present only when it is longer than `excerpt` (which then holds its opening words); readers wanting the full grounding take `passage`, else `excerpt`. Up to 2,000 characters (8,000 UTF-8 bytes) — the extraction instruments' own limit. Added (2026-10-01) as a new optional field rather than raising `excerpt`'s cap, so a reader holding the earlier lexicon still accepts these records. Stamped at creation like all provenance."
+        },
+        "anchorLocations": {
+          "type": "array",
+          "maxLength": 16,
+          "description": "Where the grounding quote sits in the paper's PDF: per page, one box per line fragment of the quote. In whole PDF points (1/72 inch), origin at the top-left of the page as displayed, y counting downwards; each box rounded outward so it still covers the quote (x and y rounded down, the right and bottom edges up). Absent when the quote was not found in the PDF; a reader then finds the quote by its text. Added 2026-10-04 (the extraction pipeline's pipeline-v5, which locates every anchor in the PDF); stamped at creation like all provenance.",
+          "items": { "type": "ref", "ref": "#anchorLocation" }
+        },
+        "anchorLocationsMode": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "How the quote was matched to the PDF's text when its boxes were found: as normalised text, normalised with superscripts dropped, split across places, in a table's cells, or by a fuzzy match (the last is the least certain). Present only beside anchorLocations. Open enum (knownValues).",
+          "knownValues": [
+            "normalized",
+            "normalized-no-superscript",
+            "split",
+            "table-cells",
+            "fuzzy"
+          ]
+        },
+        "sourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2048,
+          "description": "A source outside the AT network that this record was generated from: an https address (RRGI's validator refuses any other scheme), e.g. https://api.crossref.org/works/<doi> for an attribution an attribution bot inferred from the publisher's author list. Optional and general: any record may carry it. Added 2026-10-09 (the IOSP credit bot); stamped at creation like all provenance."
+        },
+        "basis": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "How an inference was made, in plain words, e.g. 'Crossref lists this author (3 of 7).' Optional and general: any record may carry it. Added 2026-10-09 (the IOSP credit bot); stamped at creation like all provenance."
+        }
+      }
+    },
+    "accountListPurpose": {
+      "type": "string",
+      "knownValues": ["tech.scios.rrgi.defs#serviceAccounts", "tech.scios.rrgi.defs#attributionBots"],
+      "description": "What being on a tech.scios.rrgi.accountList means (modelled on app.bsky.graph.defs#listPurpose). Open enum (knownValues): a reader configured with a list checks that the list has the purpose it expects, and refuses to use it otherwise."
+    },
+    "serviceAccounts": {
+      "type": "token",
+      "description": "Accounts that are never people (setup, publishing and service accounts): readers keep their records as records but never count the account as a person, author, endorser, reviewer or maker, and ignore its attributions."
+    },
+    "attributionBots": {
+      "type": "token",
+      "description": "Accounts whose attribution records a reader trusts as bot credits, inferred by a machine. Being listed is the only thing that makes them count."
+    },
+    "accountListUse": {
+      "type": "object",
+      "required": ["list", "items"],
+      "description": "The exact list members a reader used (an assessment result records one per list, so it can be checked for ever: the repository keeps only the current members).",
+      "properties": {
+        "list": { "type": "ref", "ref": "com.atproto.repo.strongRef" },
+        "items": { "type": "array", "maxLength": 1000, "items": { "type": "ref", "ref": "#accountListUseItem" } }
+      }
+    },
+    "accountListUseItem": {
+      "type": "object",
+      "required": ["subject", "uri", "cid"],
+      "properties": {
+        "subject": { "type": "string", "format": "did" },
+        "uri": { "type": "string", "format": "at-uri", "description": "The accountListItem record." },
+        "cid": { "type": "string", "format": "cid" }
+      }
+    },
+    "anchorLocation": {
+      "type": "object",
+      "required": ["page", "boxes"],
+      "description": "One page of a grounding quote's place in the PDF (provenanceInfo.anchorLocations).",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The page, counting the PDF's first page as 1."
+        },
+        "boxes": {
+          "type": "array",
+          "maxLength": 64,
+          "items": { "type": "ref", "ref": "#anchorBox" }
+        }
+      }
+    },
+    "anchorBox": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "description": "One box: x and y its top-left corner, w and h its width and height, in whole PDF points.",
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "w": { "type": "integer", "minimum": 0 },
+        "h": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

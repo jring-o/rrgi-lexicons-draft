@@ -1,0 +1,146 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.narrative",
+  "description": "A narrative: a bundle WITH prose — the written argument built over a set of member records. Every narrative IS a bundle (it reuses the bundle's member shape: a flat, unordered set of members, each a dual-addressed com.atproto.repo.strongRef pinning an exact content version) and ADDS the argument — either inline `prose` (Markdown, for small narratives) or a `proseBlob` (a Markdown blob, for full papers that exceed the ~150 KiB record limit; exactly one of the two, tooling-enforced) — plus an optional inline `abstract` (a short teaser that rides the firehose), `references` (a map from in-prose citation markers to the records they cite), and optional `figures` (content-addressed image blobs the prose embeds). 'Every narrative is a bundle; not every bundle is a narrative' — the prose is the difference. A paper is a narrative sitting OVER a bundle: its `members` typically holds a SINGLE strongRef to the paper's published tech.scios.rrgi.bundle record (recursive composition), and the prose cites individual nodes inside that bundle via `references`. A narrative may sit over several bundles (members = multiple bundle strongRefs). Citations are content-addressed and rot-proof: the prose carries STABLE keys (never display numbers, never a brittle local ID like 'C-0001'); `references` maps each key to a strongRef plus a cached label; a reading AppView assigns display numbers and renders a reference section at read time, so editing or reordering the prose never breaks a citation (cf. \\cite{key}). Each citation is also a live entry point into the graph (resolve the strongRef → expand that node's evidence/support). Figures are NOT discourse nodes: a conceptual diagram is a plain embedded blob; a figure that PRESENTS findings (a data chart) should additionally point, via the figure's optional `subject`, at the evidence node it renders. Evolution is by versioning (a new narrative record + a tech.scios.rrgi.versionOf edge to the prior), so 'living document' and 'frozen citable snapshot' are the same mechanism — every version is an immutable, citable CID. RRGI-authored (no coalition equivalent); intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "members", "createdAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable title of the narrative (e.g. the paper title)."
+          },
+          "members": {
+            "type": "array",
+            "minLength": 1,
+            "description": "The set of member records this narrative is built over (the bundle's shape). Flat and unordered — reading order is carried by `prose`, not this list. For a paper this typically holds a SINGLE strongRef: the paper's published tech.scios.rrgi.bundle record (recursive composition). A narrative may sit over several bundles. Each member is dual-addressed (uri + cid), pinning an exact content version.",
+            "items": {
+              "type": "ref",
+              "ref": "com.atproto.repo.strongRef",
+              "description": "Dual-addressed reference (uri + cid) to one member record — typically the paper's bundle, but may be any record (node, relation, or another bundle)."
+            }
+          },
+          "prose": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "The narrative argument inline, in Markdown — for narratives small enough to fit in the record (an atproto record caps at ~150 KiB; this field caps at 100K chars, the same proven inline bound WhiteWind uses). For full papers use `proseBlob` instead. EXACTLY ONE of `prose`/`proseBlob` must be present (tooling-enforced, since lexicon cannot express oneOf). In-prose citations use stable keys (NOT display numbers, NOT brittle local IDs) in the form [@<key>], where <key> matches a references[].key. Embedded figures use [fig:<key>], where <key> matches a figures[].key. A reading AppView resolves keys, assigns display citation numbers, and renders figures plus a reference section at read time."
+          },
+          "proseBlob": {
+            "type": "blob",
+            "accept": ["text/markdown"],
+            "maxSize": 1048576,
+            "description": "The full narrative argument as a content-addressed Markdown blob, for narratives too large to inline (an atproto record caps at ~150 KiB, so a full paper's prose does not fit inline alongside its citations and figures; atproto's own guidance is to put large text in a blob). EXACTLY ONE of `prose` (inline) / `proseBlob` (blob) must be present (tooling-enforced). Carries the same [@<key>] / [fig:<key>] markers as `prose`. Like a figure, the bridge fetches and pins this blob on both IPFS nodes — its CID is a native IPFS block CID — so the argument is rot-proof and renderable directly from IPFS, while remaining atproto-native (served by getBlob, federated, and covered by the record's signed proof)."
+          },
+          "abstract": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional short inline summary/teaser (e.g. the paper's abstract or executive-summary lede). Unlike `proseBlob`, it stays IN the record, so it rides the firehose and powers cards, previews, and search without fetching the prose blob. NOT the full argument."
+          },
+          "references": {
+            "type": "array",
+            "maxLength": 4096,
+            "description": "The citation manifest: maps each in-prose citation key to the record it cites, with an optional cached label so a reference section can render without resolving every strongRef. The cited records are reachable inside `members` (e.g. by drilling into the bundle); `references` records WHICH of them the prose cites and under WHAT key.",
+            "items": {
+              "type": "ref",
+              "ref": "tech.scios.rrgi.narrative#reference"
+            }
+          },
+          "figures": {
+            "type": "array",
+            "maxLength": 256,
+            "description": "Content-addressed image blobs the prose embeds via [fig:<key>] markers. A figure is NOT a discourse node. A conceptual diagram is a plain blob; a figure that presents findings (a data chart) should also set `subject` to the evidence node it renders.",
+            "items": {
+              "type": "ref",
+              "ref": "tech.scios.rrgi.narrative#figure"
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional description of what this narrative IS (metadata about the artifact) — distinct from `prose`, which is the argument itself."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel"
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "description": "One entry in a narrative's citation manifest: a stable key (as it appears in the prose, e.g. [@<key>]) bound to the dual-addressed record it cites. By convention the key is the cited record's rkey (the TID segment of its at-uri) — identity-derived, order-free, and naturally deduped when the same record is cited more than once — but the schema requires only a stable, narrative-unique string; the convention is enforced by tooling, not here.",
+      "required": ["key", "subject"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The stable citation key used by the prose [@<key>] markers. Unique within this narrative. Never a display number; never a brittle local label (e.g. 'C-0001'). Convention: the cited record's rkey/TID."
+        },
+        "subject": {
+          "type": "ref",
+          "ref": "com.atproto.repo.strongRef",
+          "description": "Dual-addressed reference (uri + cid) to the cited member record (typically a claim or evidence node). CID mandatory, so the citation pins the exact content version and is fetchable from cold storage."
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Optional cached human-readable label (e.g. the cited claim's text) so an AppView can render the reference section without resolving every strongRef. A cache, not the source of truth — the subject's live record is authoritative."
+        }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "description": "One embedded figure: a content-addressed image blob referenced from the prose via a [fig:<key>] marker.",
+      "required": ["key", "image"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The stable key used by the prose [fig:<key>] marker. Unique within this narrative."
+        },
+        "image": {
+          "type": "blob",
+          "accept": ["image/*"],
+          "maxSize": 10000000,
+          "description": "The figure image as an ATProto blob (content-addressed; its own CID; dedupes by CID across narratives; archivable). The bridge fetches and pins this blob on both IPFS nodes."
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 4096,
+          "description": "Text description of the figure for accessibility and indexing."
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 8192,
+          "description": "Optional figure caption rendered beneath the image."
+        },
+        "subject": {
+          "type": "ref",
+          "ref": "com.atproto.repo.strongRef",
+          "description": "Optional dual-addressed reference to the evidence node this figure RENDERS, for a figure that presents findings (a data chart). Conceptual diagrams omit this."
+        }
+      }
+    }
+  }
+}

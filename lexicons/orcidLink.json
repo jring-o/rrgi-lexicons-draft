@@ -1,0 +1,31 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.orcidLink",
+  "description": "A person's own statement, in their own account, of their ORCID iD: 'my ORCID is X' (typed on the IOSP room's dashboard; added 2026-10-03). It is what lets RRGI find a person's papers by their ORCID and match an attribution naming that ORCID to the person, so they can confirm it. Typed, never verified: RRGI does not check the ORCID with ORCID's sign-in, so it is the person's claim, not proof. The latest record per account wins. It is not a graph node: views never return it; it is read by the person API. An RRGI extension (MIRA has no person records).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["orcid", "createdAt"],
+        "properties": {
+          "orcid": {
+            "type": "string",
+            "maxLength": 19,
+            "description": "The ORCID iD, bare: 0000-0000-0000-000X (RRGI's validator checks the form: four groups of four digits, the last character a digit or X; a lower-case x is accepted and read as X)."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Optional: the name the person goes by in the field."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.contradicts",
+  "description": "A reified, SYMMETRIC 'contradicts' relation: the subject and object claims cannot both be true — propositional incompatibility. Both endpoints MUST be claims (tech.scios.rrgi.claim). The subject/object slots carry NO direction (A contradicts B == B contradicts A): if one claim rules out the other, the reverse holds by contraposition, so a directed contradicts has no coherent reading — compare owl:disjointWith, which asserts two class extensions 'have no individuals in common' and holds equally either way. The felt asymmetry between a challenging and an incumbent claim is a directed argumentative ATTACK — a speech act, in the sense of Dung's attack relation (Dung 1995, Artificial Intelligence 77:321-357) and of CiTO's directed cito:disputes/cito:refutes citation acts — and in RRGI it is carried by the record's authorship and signature (who picked the fight), never by the edge's direction. This is equivalentTo's negative twin — one asserts 'these say the same thing', the other 'these cannot both be true' — but the twin-ness is record shape ONLY; three caveats are normative: (1) NO TRANSITIVE CLOSURE — contradiction is not transitive (A incompatible with B and B incompatible with C says nothing about A vs C), so the AppView's equivalence-cluster closure machinery MUST NOT be reused here. (2) It DOES lift across equivalence — A contradicts B and B equivalentTo B' entails A contradicts B'; sound, cheap, computed at read time; this lift is the honest 'contested' signal. (3) A contradicts pair whose two endpoints sit inside ONE equivalence cluster is a red flag — a proposition cannot contradict itself, so either the equivalence or the contradiction is wrong; cheap to detect at read time. Unlike equivalentTo (which carries only a description), contradicts carries an optional warrant: asserting incompatibility is an ARGUED judgment — why the two cannot both hold — where asserting sameness is a recognition; that asymmetry is deliberate. Not evidential: contradicts has no strength field and confers no evidential weight — evidence against a claim is tech.scios.rrgi.opposes. An AT Protocol lexicon cannot type strongRef endpoints, so these rules are normative prose here; enforcement lives in the AppView indexer and in every write path. An RRGI extension — the MIRA community schema (github.com/MIRA-science/schema) has no contradiction concept — intended to be proposed upstream to MIRA. Like every RRGI relation, endpoints are dual-addressed via com.atproto.repo.strongRef (uri + cid, CID mandatory), so the edge pins exact content versions and cannot rot.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "object", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to one of the two incompatible claims. The relation is symmetric, so subject/object are interchangeable; who asserted the incompatibility is the record's authorship, not this slot. MUST be a claim (tech.scios.rrgi.claim); the lexicon cannot type a strongRef endpoint, so the indexer enforces this. CID mandatory."
+          },
+          "object": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Dual-addressed reference (URI + CID) to the other incompatible claim. See subject: symmetric, MUST be a claim, CID mandatory."
+          },
+          "warrant": {
+            "type": "string",
+            "maxLength": 4096,
+            "description": "Optional argumentation warrant: the reasoning WHY the two claims cannot both be true (e.g. they assign incompatible values to one quantity, or their joint truth entails an absurdity). Asserting incompatibility is an argued judgment — which is why contradicts carries a warrant where equivalentTo carries only a description."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "Optional elaboration or caveat on this incompatibility."
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

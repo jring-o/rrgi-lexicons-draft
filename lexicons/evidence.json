@@ -1,0 +1,86 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.evidence",
+  "description": "An evidence bundle: a minimal interpretation of an artifact (data, observation, experimental outcome) that can support or oppose claims. In this grammar, evidence is the ONLY record type that can support or oppose a claim (see tech.scios.rrgi.supports/opposes — 'Evidence is the only Argument'), which is why it is deliberately separated from claims as a first-class type: the separation makes it assessable what is known empirically vs. what is asserted, and no chain of assertions can manufacture apparent empirical backing. Grounded in the MIRA community schema (github.com/MIRA-science/schema, mira.yaml, Evidence class); first ported (2026-05) from the DiscourseGraphs coalition's org.discoursegraphs.evidence (github.com/DiscourseGraphs/schemas) — historical lineage, kept as attribution. Dual-addressing of every reference is an RRGI extension intended to be proposed upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The evidence statement: a minimal interpretation of data or observations from a specific study or experiment."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional additional context: methods, conditions, limitations, or contextual details (e.g., apparatus, sample, task parameters) needed to interpret this evidence."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Result', 'Observation', 'Measurement')."
+          },
+          "contextEntities": {
+            "type": "array",
+            "description": "Aboutness: the concrete concepts and entities this evidence is about (e.g. phenomena, materials, instruments, datasets, populations, tasks) — the same field claims and questions carry. Records point at external subject authorities rather than minting an internal entity registry, following Wikidata P921 'main subject' ('primary topic of a work or act of communication') and schema.org 'about' ('The subject matter of an object'); each entry's optional uri resolves to the external authority. MIRA's closest anchor is observationBase (Evidence→Entity, a prov:Entity) — marked provisional upstream, noted as the eventual convergence point (the link itself, from evidence to a data record, exists since 2026-10-03 as tech.scios.rrgi.observationBase). Stamped at authoring/decomposition time; enables 'find all evidence about concept X' and shared-concept joins across literatures.",
+            "maxLength": 64,
+            "items": {
+              "type": "ref",
+              "ref": "#contextEntity"
+            }
+          },
+          "plotReading": {
+            "type": "boolean",
+            "description": "True when the value this evidence states was read off a plot (shown as 'read from the plot'): never finer than the plot's axis allows. Written by the extraction pipeline's figure step (pipeline-v5, 2026-10-04) on the evidence it states from a figure; false there when the statement is not a reading off a plot; absent on other evidence."
+          },
+          "claimless": {
+            "type": "boolean",
+            "description": "True when no claim bears on this evidence: the figure step stated what a figure shows, and no claim of the paper is supported or opposed by it (pipeline-v5, 2026-10-04). Absent otherwise."
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "contextEntity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Name or identifier of the concept or entity. Prefer specific over generic — a rare, precise concept is worth more to discovery than a broad one."
+        },
+        "entityType": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The type of entity (e.g., 'phenomenon', 'material', 'instrument', 'dataset', 'population', 'method')."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URI identifying this entity in an external ontology or knowledge base (e.g. a Wikidata item) — the P921/about pattern: reference external authorities, never mint an internal registry."
+        }
+      }
+    }
+  }
+}

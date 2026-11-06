@@ -1,0 +1,78 @@
+{
+  "lexicon": 1,
+  "id": "tech.scios.rrgi.study",
+  "description": "A study: a specific investigation, experiment, or analysis — the research ACTIVITY that produces evidence. It sits between a source and the evidence it grounds: a source DESCRIBES a study (tech.scios.rrgi.describes) and a study GROUNDS evidence (tech.scios.rrgi.grounds), so the canonical provenance path is source → describes → study → grounds → evidence. Maps to the MIRA schema's Study class (github.com/MIRA-science/schema, mira.yaml on main: Study mixes in NodeSchema + Activity — it is both a discourse-graph node and a PROV Activity). Introduced to align RRGI with MIRA, which models the source→evidence link as the two hops source→study→evidence rather than RRGI's older single-hop 'informs' relation (now DELETED — no informs lexicon exists). A study may FOLLOW a protocol via the reified tech.scios.rrgi.follows relation (study→protocol, MIRA's follows slot) — the method hop of the spine. Scope is otherwise deliberately minimal: the node itself carries none of MIRA's Request links or observation slots yet. Like the other RRGI node types it is independently authored, content-addressed, and carries provenance; intended to be proposed back upstream.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8192,
+            "description": "The study statement: a concise, self-contained description of the investigation, experiment, or analysis that produced the evidence."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384,
+            "description": "Optional additional context: design, methods, scope, population/sample, conditions, or limitations needed to interpret what this study did."
+          },
+          "localLabel": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#localLabel",
+            "description": "Optional local label override (e.g., 'Experiment', 'Trial', 'Analysis', 'Field study')."
+          },
+          "contextEntities": {
+            "type": "array",
+            "description": "Aboutness: the concrete concepts and entities this study is about (e.g. phenomena, materials, instruments, datasets, populations, tasks) — the same field claims, evidence, and questions carry (extended to study/protocol 2026-07-25, DI-audit fix 2: without it the discovery scan's concept join cannot see methods). Records point at external subject authorities rather than minting an internal entity registry, following Wikidata P921 'main subject' and schema.org 'about'; each entry's optional uri resolves to the external authority. Stamped at authoring/decomposition time; enables shared-concept joins across literatures.",
+            "maxLength": 64,
+            "items": {
+              "type": "ref",
+              "ref": "#contextEntity"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "maxLength": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "provenance": {
+            "type": "ref",
+            "ref": "tech.scios.rrgi.defs#provenanceInfo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "contextEntity": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Name or identifier of the concept or entity. Prefer specific over generic — a rare, precise concept is worth more to discovery than a broad one."
+        },
+        "entityType": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The type of entity (e.g., 'phenomenon', 'material', 'instrument', 'dataset', 'population', 'method')."
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URI identifying this entity in an external ontology or knowledge base (e.g. a Wikidata item) — the P921/about pattern: reference external authorities, never mint an internal registry."
+        }
+      }
+    }
+  }
+}
